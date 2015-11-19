@@ -285,7 +285,6 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
         room= RectangularRoom(width, height)
         timesteps.append(NumTimeStep(num_robots, speed, width, height, min_coverage,
                   robot_type))
-    print "list of time steps"+str(timesteps)
     return sum(timesteps) / float(len(timesteps))
 
    
@@ -303,7 +302,6 @@ def NumTimeStep(num_robots, speed, width, height, min_coverage,
         print "number of timesteps now"+str(timestep)
         x=runSimulationonce(num_robots, speed, width, height, min_coverage,
                   robot_type, room)
-    print "timesteps"+str(timestep)
     return timestep
 
 def runSimulationonce(num_robots, speed, width, height, min_coverage,
@@ -315,7 +313,6 @@ def runSimulationonce(num_robots, speed, width, height, min_coverage,
     for i in range(num_robots):
         cleantiles=singleRobotSimulation(speed, width, height, robot_type, room)
         perccov= cleantiles/(float(width*height))
-    print "percov equals"+str(perccov)
     return perccov
 
 def singleRobotSimulation(speed, width, height, robot_type, room):
@@ -325,8 +322,6 @@ def singleRobotSimulation(speed, width, height, robot_type, room):
     """
     robot= robot_type(room, speed)
     z=robot.updatePositionAndClean()
-    print room.cleaned
-    print "this is num of titles cleaned"+str(room.getNumCleanedTiles())
     return room.getNumCleanedTiles()
 
 
