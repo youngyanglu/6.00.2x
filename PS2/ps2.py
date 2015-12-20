@@ -6,6 +6,8 @@ import random
 import ps2_visualize
 import pylab
 
+from pdb import set_trace as bp
+
 # For Python 2.7:
 from ps2_verify_movement27 import testRobotMovement
 
@@ -180,6 +182,7 @@ class Robot(object):
         self.room=room
         self.speed=speed
         self.position= room.getRandomPosition()
+        self.room.cleanTileAtPosition(self.position)
         self.direction= random.uniform(0,360)
         
     def getRobotPosition(self):
@@ -244,17 +247,15 @@ class StandardRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-
-        newposition= self.position.getNewPosition(self.direction, self.speed)
+        temp= self.position.getNewPosition(self.direction, self.speed)
         
-        while not self.room.isPositionInRoom(newposition):
+        if self.room.isPositionInRoom(temp):
+            self.position=temp
+            self.room.cleanTileAtPosition(self.position)
+        else:
             self.direction=random.uniform(0,360)
-            newposition= self.position.getNewPosition(self.direction, self.speed)
-        self.room.cleanTileAtPosition(newposition)
-        self.position=newposition
-        return newposition
-        
-                
+
+        return self.position
         
 
 # Uncomment this line to see your implementation of StandardRobot in action!
@@ -283,50 +284,42 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     timesteps=[]
     for j in range(num_trials):
         room= RectangularRoom(width, height)
-        timesteps.append(NumTimeStep(num_robots, speed, width, height, min_coverage,
-                  robot_type))
+        robotlist=[]
+        for i in range(num_robots):
+            robotlist.append(robot_type(room, speed))
+        timesteps.append(NumTimeStep(robotlist,speed, width, height, min_coverage,robot_type, room))
     return sum(timesteps) / float(len(timesteps))
 
    
-def NumTimeStep(num_robots, speed, width, height, min_coverage,
-                  robot_type):
+def NumTimeStep(listofrobots,speed, width, height, min_coverage,
+                  robot_type, room):
     """
     Lets robots roam until cleaned at least minimum coverage. 
     Returns the time needed to clean minimum coverage. 
     """
     timestep=0
     x=0
-    room=RectangularRoom(width, height)
     while x< min_coverage:
         timestep=timestep+1
-        print "number of timesteps now"+str(timestep)
-        x=runSimulationonce(num_robots, speed, width, height, min_coverage,
+        for i in range(len(listofrobots)):
+            x=runSimulationonce(listofrobots[i],speed, width, height, min_coverage,
                   robot_type, room)
     return timestep
 
-def runSimulationonce(num_robots, speed, width, height, min_coverage,
+def runSimulationonce(robotid, speed, width, height, min_coverage,
                   robot_type, room):
     """
     For given number of robots, returns the amount of area cleaned after 
     one timestep
     """
-    for i in range(num_robots):
-        cleantiles=singleRobotSimulation(speed, width, height, robot_type, room)
-        perccov= cleantiles/(float(width*height))
+    z=robotid.updatePositionAndClean()
+    cleantiles= room.getNumCleanedTiles()        
+    perccov= cleantiles/(float(width*height))
+
     return perccov
 
-def singleRobotSimulation(speed, width, height, robot_type, room):
-    """
-    Moves a single robot for one time period, 
-    cleans the tile and adds the tile to clean pile
-    """
-    robot= robot_type(room, speed)
-    z=robot.updatePositionAndClean()
-    return room.getNumCleanedTiles()
-
-
 # Uncomment this line to see how much your simulation takes on average
-print  runSimulation(1, 1.0, 5, 5, 0.2, 1, StandardRobot)
+#print  runSimulation(1, 1.0, 10, 10, .75, 100, StandardRobot)
 
 
 # === Problem 4
@@ -337,12 +330,21 @@ class RandomWalkRobot(Robot):
     """
     def updatePositionAndClean(self):
         """
-        Simulate the passage of a single time-step.
+        Simulate the raise passage of a single time-step.
 
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        raise NotImplementedError
+        temp= self.position.getNewPosition(self.direction, self.speed)
+        
+        if self.room.isPositionInRoom(temp):
+            self.position=temp 
+            self.room.cleanTileAtPosition(self.position)
+            self.direction=random.uniform(0,360)
+        else:
+            self.direction=random.uniform(0,360)
+
+        return self.position
 
 
 def showPlot1(title, x_label, y_label):

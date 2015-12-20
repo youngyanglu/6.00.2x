@@ -88,6 +88,22 @@ class Cluster(object):
                     distances.append(i.distance(j))
         return sum(distances)/float(len(distances))
 
+    def mysteryLinkageDist(self, other):
+        av_dist = self.averageLinkageDist(other)
+        max_dist = self.maxLinkageDist(other)
+        min_dist = self.singleLinkageDist(other)
+        retDist = 0.0
+        if av_dist == max_dist and max_dist == min_dist:
+            retDist = av_dist
+        elif av_dist == max_dist:
+            retDist = av_dist
+        elif av_dist == min_dist:
+            retDist = av_dist
+        elif max_dist == min_dist:
+            retDist = min_dist
+        else:
+            retDist = random.choice([av_dist,min_dist,max_dist])
+        return retDist
 
     def members(self):
         for p in self.points:
